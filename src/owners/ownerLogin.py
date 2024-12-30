@@ -1,10 +1,9 @@
-from flask import Blueprint, render_template, request, flash
+from flask import Blueprint, render_template, request, flash, redirect, url_for
 import sqlite3
 
-auth_bp = Blueprint("auth", __name__, template_folder="../templates")
+login_bp = Blueprint("login", __name__, template_folder="../templates")
 
-
-@auth_bp.route("/login", methods=["GET", "POST"])
+@login_bp.route("/", methods=["GET", "POST"])
 def login():
     if request.method == "GET":
         return render_template("login.html")  # Renderiza el formulario de login
@@ -16,17 +15,17 @@ def login():
 
         # Validar credenciales
         if validate_login(email, password):
-            flash("Login exitoso", "success")
-            return render_template(("home.html"))  # Redirigir a la página principal
+            # flash("Login successful", "success")
+            return render_template("home.html")  # Redirigir a la página principal
         else:
-            flash("Credenciales inválidas. Inténtalo de nuevo.", "danger")
+            flash("Invalid credentials. Please try again.", "danger")
             return render_template("login.html")
 
 
 def validate_login(email, password):
     try:
         # Conectar a la base de datos
-        db_path = r"C:\Users\stile\OneDrive\Escritorio\Aplicacion\src\db\databases.db"
+        db_path = r"C:\Users\stile\OneDrive\Escritorio\Aplicacion\src\db\database.db"
         conn = sqlite3.connect(db_path)
         cursor = conn.cursor()
 
@@ -40,7 +39,7 @@ def validate_login(email, password):
         )
         user = cursor.fetchone()
 
-        # Si encuentra un usuario, devuelve True, de lo contrario False
+        # Si encuentra un usuario, devuelve True
         return user is not None
 
     except sqlite3.Error as e:
