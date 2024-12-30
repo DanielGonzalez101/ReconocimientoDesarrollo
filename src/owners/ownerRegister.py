@@ -5,6 +5,14 @@ import sqlite3
 owners_bp = Blueprint("owner", __name__, template_folder="../templates")
 
 
+def password_confirm(password, confirm_password):
+
+    if password == confirm_password:
+        return True
+    else:
+        return False
+
+
 @owners_bp.route("/registerOwner", methods=["GET", "POST"])
 def registerOwner():
     if request.method == "GET":
@@ -22,27 +30,38 @@ def registerOwner():
         password = request.form.get("password")
         confirm_password = request.form.get("confirmPassword")
 
-        if password != confirm_password:
-            print("Passwords do not match", "danger")
+        # Verifica los datos recibidos
+        print(
+            f"Datos recibidos: {first_name}, {last_name}, {age}, {id_number}, {email}, {password}, {confirm_password}"
+        )
+
+        # Valida las contraseñas
+        if password_confirm(password, confirm_password):
+            insert_owner(
+                first_name, last_name, age, id_number, email, password
+            )
+            return render_template("login.html")  # Redirige al login si es exitoso
+        elif not password_confirm(password, confirm_password):
+            flash("Passwords do not match", "error")
             return render_template("registerOwner.html")
-
-        insert_owner(first_name, last_name, age, id_number, email, password)
-
-        # Lógica de registro o base de datos
-        print("Registration successful", "success")
-        print(first_name, last_name, age, id_number, email, password)
-        return render_template("login.html")
+        else:
+            flash(
+                "An error occurred while saving your data. Please try again.", "error"
+            )
+            return render_template("registerOwner.html")
 
 
 def insert_owner(first_name, last_name, age, id_number, email, password):
     try:
         # Conexión a la base de datos SQLite
+        print("Intentando conectar a la base de datos...")
         conn = sqlite3.connect(
             r"C:\Users\stile\OneDrive\Escritorio\Aplicacion\src\db\database.db"
         )
         cursor = conn.cursor()
 
         # Inserta datos en la tabla owners
+        print("Insertando datos en la base de datos...")
         cursor.execute(
             """
             INSERT INTO owners (first_name, last_name, age, id_number, email, password)
@@ -50,12 +69,17 @@ def insert_owner(first_name, last_name, age, id_number, email, password):
             """,
             (first_name, last_name, age, id_number, email, password),
         )
+
         # Guarda los cambios
         conn.commit()
+        print("Datos guardados exitosamente.")
+        return True  # Retorna True si fue exitoso
 
     except sqlite3.Error as e:
         print(f"Error inserting data into SQLite: {e}")
+        return False  # Retorna False si hay un error
 
     finally:
         # Cierra la conexión
-        conn.close()
+        if "conn" in locals():
+            conn.close()
