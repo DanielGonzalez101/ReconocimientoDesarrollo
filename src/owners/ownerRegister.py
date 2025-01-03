@@ -4,8 +4,6 @@ import sqlite3
 # Define el blueprint
 register_bp = Blueprint("register", __name__, template_folder="../templates")
 
-
-
 def password_confirm(password, confirm_password):
 
     if password == confirm_password:
@@ -67,9 +65,9 @@ def registerOwner():
         confirm_password = request.form.get("confirmPassword")
 
         # Verifica los datos recibidos
-        print(
-            f"Datos recibidos: {first_name}, {last_name}, {age}, {id_number}, {email}, {password}, {confirm_password}"
-        )
+        # print(
+        #     f"Datos recibidos: {first_name}, {last_name}, {age}, {id_number}, {email}, {password}, {confirm_password}"
+        # )
 
         if verify_email(email):
             flash("Email already registered", "error")
@@ -87,7 +85,6 @@ def registerOwner():
                 "An error occurred while saving your data. Please try again.", "error"
             )
             return render_template("registerOwner.html")
-
 
 def insert_owner(first_name, last_name, age, id_number, email, password):
     try:
